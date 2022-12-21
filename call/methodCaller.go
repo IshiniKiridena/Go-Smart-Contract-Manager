@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	abiLoad "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -64,25 +64,13 @@ func CreateInstance(abi string, bin string, contractAdd string) {
 
 	//get nonce
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-	nonce1, errWhenGettingNonce := client.PendingNonceAt(context.Background(), fromAddress)
-	if errWhenGettingNonce != nil {
-		fmt.Println("4 ", fmt.Errorf(errWhenGettingNonce.Error()))
-		return
-	}
 
 	//get the gas price
 	gasPrice, errWhenGettingGasPrice := client.EstimateGas(context.Background(), ethereum.CallMsg{})
 	if errWhenGettingGasPrice != nil {
-		fmt.Println("5 ", fmt.Errorf(errWhenGettingGasPrice.Error()))
+		fmt.Println("4 ", fmt.Errorf(errWhenGettingGasPrice.Error()))
 		return
 	}
-
-	//create the keyed transactor
-	auth1 := bind.NewKeyedTransactor(privateKey)
-	auth1.Nonce = big.NewInt(int64(nonce1))
-	auth1.Value = big.NewInt(0)      // in wei
-	auth1.GasLimit = uint64(3000000) // in units
-	auth1.GasPrice = big.NewInt(int64(gasPrice))
 
 	//assign metadata for the contract
 	var BuildData = &bind.MetaData{
@@ -95,7 +83,7 @@ func CreateInstance(abi string, bin string, contractAdd string) {
 
 	parsed, errWhenGettingABI := BuildData.GetAbi()
 	if errWhenGettingABI != nil {
-		fmt.Println("6 ", fmt.Errorf(errWhenGettingABI.Error()))
+		fmt.Println("5 ", fmt.Errorf(errWhenGettingABI.Error()))
 		return
 	}
 
@@ -106,7 +94,7 @@ func CreateInstance(abi string, bin string, contractAdd string) {
 	address := common.HexToAddress(contractAdd)
 	contract, errWhenBindingContract := bindBuild(address, client, client, client)
 	if errWhenBindingContract != nil {
-		fmt.Println("7 ", fmt.Errorf(errWhenBindingContract.Error()))
+		fmt.Println("6 ", fmt.Errorf(errWhenBindingContract.Error()))
 		return
 	}
 
@@ -116,23 +104,44 @@ func CreateInstance(abi string, bin string, contractAdd string) {
 		BuildFilterer:   BuildFilterer{contract: contract},
 	}
 
-	//set water method calling
-	waterValue := big.NewInt(2)
-	exponent := big.NewInt(0)
+	//set the arrays
+	methodArray := [...]string{"setENERGY_CONSUMPTION", "setHOURS", "setUNITS"}
+	valueArray := [...]int{2, 3, 4}
+	exponentArray := [...]int{0, 0, 0}
 
-	transactionWater, errWhenSettingVariableValue := contractBuilded.BuildTransactor.contract.Transact(auth1, "setWATER", waterValue, exponent)
-	if errWhenSettingVariableValue != nil {
-		fmt.Println("8 ", fmt.Errorf(errWhenSettingVariableValue.Error()))
-		return
+	for i := 0; i < len(methodArray); i++ {
+		fmt.Println("--------------------------Executing setter : ", methodArray[i])
+		nonce1, errWhenGettingNonce := client.PendingNonceAt(context.Background(), fromAddress)
+		if errWhenGettingNonce != nil {
+			fmt.Println("7 ", fmt.Errorf(errWhenGettingNonce.Error()))
+			return
+		}
+
+		//create the keyed transactor
+		auth1 := bind.NewKeyedTransactor(privateKey)
+		auth1.Nonce = big.NewInt(int64(nonce1))
+		auth1.Value = big.NewInt(0)      // in wei
+		auth1.GasLimit = uint64(3000000) // in units
+		auth1.GasPrice = big.NewInt(int64(gasPrice))
+
+		//set values method calling
+		valueInput := big.NewInt(int64(valueArray[i]))
+		exponentInput := big.NewInt(int64(exponentArray[i]))
+
+		transactionWater, errWhenSettingVariableValue := contractBuilded.BuildTransactor.contract.Transact(auth1, methodArray[i], valueInput, exponentInput)
+		if errWhenSettingVariableValue != nil {
+			fmt.Println("8 ", fmt.Errorf(errWhenSettingVariableValue.Error()))
+			return
+		}
+		fmt.Println(methodArray[i]+" data added : TRANSACTION : ", transactionWater.Hash().Hex())
+
+		time.Sleep(30 * time.Second)
 	}
-	fmt.Println("Set water data added : TRANSACTION : ", transactionWater.Hash().Hex())
-
-	time.Sleep(30 * time.Second)
 
 	//get nonce
 	nonce2, errWhenGettingNonce := client.PendingNonceAt(context.Background(), fromAddress)
 	if errWhenGettingNonce != nil {
-		fmt.Println("4 ", fmt.Errorf(errWhenGettingNonce.Error()))
+		fmt.Println("9 ", fmt.Errorf(errWhenGettingNonce.Error()))
 		return
 	}
 
@@ -146,16 +155,31 @@ func CreateInstance(abi string, bin string, contractAdd string) {
 	//calculation execution call
 	transactionCalculation, errWhenCalculating := contractBuilded.BuildTransactor.contract.Transact(auth2, "executeCalculation")
 	if errWhenCalculating != nil {
-		fmt.Println("9 ", fmt.Errorf(errWhenCalculating.Error()))
+		fmt.Println("10 ", fmt.Errorf(errWhenCalculating.Error()))
 		return
 	}
 
 	fmt.Println("Calculation : TRANSACTION : ", transactionCalculation.Hash().Hex())
 
+	time.Sleep(30 * time.Second)
+
+	//value getter
+	var out []interface{}
+	errWhenCallingContract := contractBuilded.BuildCaller.contract.Call(nil, &out, "getValues")
+	if errWhenCallingContract != nil {
+		fmt.Println("11 ", fmt.Errorf(errWhenCallingContract.Error()))
+		return
+	}
+
+	out0 := *abiLoad.ConvertType(out[0], new(*big.Int)).(**big.Int)
+	out1 := *abiLoad.ConvertType(out[1], new(*big.Int)).(**big.Int)
+
+	fmt.Println("Value " + out0.String())
+	fmt.Println("Exponent " + out1.String())
 }
 
 func bindBuild(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(BuildABI))
+	parsed, err := abiLoad.JSON(strings.NewReader(BuildABI))
 	if err != nil {
 		return nil, err
 	}
