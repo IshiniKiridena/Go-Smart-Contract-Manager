@@ -1,7 +1,7 @@
 -------------------------------------------------------------------Metric 1-------------------------------------------------------------------
 solcjs --abi Metric1.sol -o build
 solcjs --bin Metric1.sol -o build
-./abigen --bin=Metric1_sol_Metric1_63367af765d44a7b142f7DevTest01a.bin --abi=Metric1_sol_Metric1_63367af765d44a7b142f7DevTest01a.abi --pkg=store --out=Store.go
+./abigen --bin=Metric1_sol_Metric1_63367af765d44a7b142f7DevTest01a.bin --abi=Metric1_sol_Metric1_63367af765d44a7b142f7DevTest01a.abi --pkg=store --out=Metric1.go
 
 Nonce :  330
 Gas price pure :  53000
@@ -18,7 +18,7 @@ Transaction Hash ;  https://sepolia.etherscan.io/tx/0x568d1c7ba9743eaadf6ae5f00e
 -------------------------------------------------------------------Metric 2-------------------------------------------------------------------
 solcjs --abi Metric2.sol -o build
 solcjs --bin Metric2.sol -o build
-./abigen --bin=Metric2_sol_Metric2.bin --abi=Metric2_sol_Metric2.abi --pkg=store --out=Store.go
+./abigen --bin=Metric2_sol_Metric2.bin --abi=Metric2_sol_Metric2.abi --pkg=store --out=Metric2.go
 
 Nonce :  329
 Gas price pure :  53000
