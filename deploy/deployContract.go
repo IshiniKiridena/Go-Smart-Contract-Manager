@@ -8,7 +8,7 @@ import (
 	"log"
 	"math/big"
 
-	store "github.com/IshiniKiridena/SmartC/build"
+	metric1 "github.com/IshiniKiridena/SmartC/build"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -20,7 +20,7 @@ var privKey = "4752159e7dd9f582f651c0feb8a53eb93c2737a8491341ad5869dd6ca067acfd"
 
 func DeployContract() error {
 	//this dial should be the infura project id - api key
-	client, err := ethclient.Dial("https://sepolia.infura.io/v3/b058f78814274e9eb6cb3796fa0527e4")
+	client, err := ethclient.Dial("https://sepolia.infura.io/v3/f7ad4e6f2bd54303b26fb0e0679752f8")
 	if err != nil {
 		log.Fatal(err)
 		return errors.New(err.Error())
@@ -61,12 +61,12 @@ func DeployContract() error {
 	auth := bind.NewKeyedTransactor(privateKey)
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(0)      // in wei
-	auth.GasLimit = uint64(1000000) // in units
+	auth.GasLimit = uint64(3000000) // in units
 	auth.GasPrice = big.NewInt(int64(gasPrice))
 	fmt.Println("Auth  : ", auth)
 
-	input := "1.0"
-	address, tx, instance, err := store.DeployStore(auth, client, input)
+	//input := "1.0"
+	address, tx, instance, err := metric1.DeployStore(auth, client)
 	if err != nil {
 		log.Fatal(err)
 		return errors.New(err.Error())
