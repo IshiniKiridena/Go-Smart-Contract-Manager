@@ -3,11 +3,11 @@ package call
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/big"
 	"strings"
-	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -142,18 +142,18 @@ func CreateInstance1(abi string, bin string, contractAdd string) {
 		BuildFilterer:   BuildFilterer{contract: contract},
 	}
 
-	transactionAddDetails, errWhenAddingDetails := contractBuilded.BuildTransactor.contract.Transact(auth1, "addDetails")
-	if errWhenAddingDetails != nil {
-		fmt.Println("8 ", fmt.Errorf(errWhenAddingDetails.Error()))
-		return
-	}
-	fmt.Println("Data added : TRANSACTION : ", transactionAddDetails.Hash().Hex())
+	//transactionAddDetails, errWhenAddingDetails := contractBuilded.BuildTransactor.contract.Transact(auth1, "addDetails")
+	//if errWhenAddingDetails != nil {
+	//	fmt.Println("8 ", fmt.Errorf(errWhenAddingDetails.Error()))
+	//	return
+	//}
+	//fmt.Println("Data added : TRANSACTION : ", transactionAddDetails.Hash().Hex())
 
-	time.Sleep(30 * time.Second)
+	//time.Sleep(30 * time.Second)
 
 	//set the arrays
-	valueArrayForFormulas := [...]string{"631a0b4ad9241a9374fConfig01", "6360bc1c2e2e07a704babfa6"}
-	valueArrayForValues := [...]string{"e1223109481cf739d19e6735d0236577", "e1223109481cf739d19e6735d0236578", "e1223109481cf739d19e6735d0236579"}
+	valueArrayForFormulas := [...]string{"631a0b4ad9241a9374fConfig00", "631a0b4ad9241a9374fConfig02"}
+	valueArrayForValues := [...]string{"123123123123aaaaa00", "e1223109481cf739d19e6735d0236577", "e1223109481cf739d19e6735d0236577"}
 
 	fmt.Println("\n-------------------Calling getter for formulas-------------------")
 	for i := 0; i < len(valueArrayForFormulas); i++ {
@@ -179,7 +179,12 @@ func CreateInstance1(abi string, bin string, contractAdd string) {
 			return
 		}
 		fmt.Println("Formula details for formula ID: " + valueArrayForFormulas[i] + " -> ")
-		fmt.Printf("%v\n", formula1)
+		fmt.Println("Formula ID: ", formula1.FormulaID)
+		fmt.Println("Contract Address: ", formula1.ContractAddress)
+		fmt.Println("No of values: ", formula1.NoOfValues)
+		fmt.Println("Activity ID: ", formula1.ActivityID)
+		fmt.Println("Activity Name: ", HexStringToString(formula1.ActivityName))
+		fmt.Println("Value IDs: ", formula1.ValueIDs)
 		fmt.Println()
 	}
 
@@ -208,7 +213,19 @@ func CreateInstance1(abi string, bin string, contractAdd string) {
 			return
 		}
 		fmt.Println("Value details for value ID: " + valueArrayForValues[i] + " -> ")
-		fmt.Printf("%v\n", value1)
+		fmt.Println("Value ID: ", value1.ValueID)
+		fmt.Println("Value Name: ", value1.ValueName)
+		fmt.Println("Workflow ID: ", value1.WorkflowID)
+		fmt.Println("Stage ID: ", value1.StageID)
+		fmt.Println("Stage Name: ", HexStringToString(value1.StageName))
+		fmt.Println("Key Name: ", HexStringToString(value1.KeyName))
+		fmt.Println("TDP Type: ", value1.TdpType)
+		fmt.Println("Binding Type: ", value1.BindingType)
+		fmt.Println("Artifact ID: ", value1.ArtifactID)
+		fmt.Println("Primary Key Row ID: ", value1.PrimaryKeyRowID)
+		fmt.Println("Artifact Template Name: ", HexStringToString(value1.ArtifactTemplateName))
+		fmt.Println("Field Key: ", HexStringToString(value1.FieldKey))
+		fmt.Println("Field Name: ", HexStringToString(value1.FieldName))
 		fmt.Println()
 	}
 	//	// get the details and add if not present
@@ -252,4 +269,9 @@ func bindBuild(address common.Address, caller bind.ContractCaller, transactor bi
 		return nil, err
 	}
 	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
+}
+
+func HexStringToString(value string) string {
+	hx, _ := hex.DecodeString(value)
+	return string(hx)
 }
