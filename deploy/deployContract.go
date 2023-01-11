@@ -9,7 +9,7 @@ import (
 	"math/big"
 
 	metric1 "github.com/IshiniKiridena/SmartC/build"
-	"github.com/ethereum/go-ethereum"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -47,23 +47,36 @@ func DeployContract() error {
 	}
 	fmt.Println("Nonce : ", nonce)
 
-	var gasP = 47045172800000
-
-	gasPrice, err := client.EstimateGas(context.Background(), ethereum.CallMsg{})
-	if err != nil {
-		log.Fatal(err)
-		return errors.New(err.Error())
+	//get the gas price - oracle
+	gasPriceAsString, errWhenGettingGasPrice := GetGasPrice()
+	if errWhenGettingGasPrice != nil {
+		fmt.Println("Error when getting gas price: " + errWhenGettingGasPrice.Error())
+		return errors.New(errWhenGettingGasPrice.Error())
 	}
-	fmt.Println("Gas price pure : ", gasPrice)
-	fmt.Println("Generated gas price : ", gasP)
 
+	//convert string to big int
+	gasPrice := new(big.Int)
+    gasPrice, err5 := gasPrice.SetString(gasPriceAsString, 10)
+    if !err5 {
+        fmt.Println("Error in converting string to big int")
+        return errors.New("Error in converting string to big int")
+    }
+
+	//---------------------------------------------------------------------------------------------------Using equation in the yellow paper
+	gasLimit := 3000000
+
+	e := new(big.Int)
 	//creating new keyed transactor
 	auth := bind.NewKeyedTransactor(privateKey)
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(0)      // in wei
-	auth.GasLimit = uint64(3000000) // in units
-	auth.GasPrice = big.NewInt(int64(gasPrice))
+	auth.GasLimit = uint64(gasLimit) // in units
+
+	auth.GasPrice = e.Mul(gasPrice, big.NewInt(1000000000))
 	fmt.Println("Auth  : ", auth)
+
+	fmt.Println("Gas price : ", auth.GasPrice)
+	fmt.Println("Gas limit : ", auth.GasLimit)
 
 	//input := "1.0"
 	address, tx, instance, err := metric1.DeployStore(auth, client)

@@ -1,3 +1,15 @@
+-------------------------------------------------------------------Metric new 10.01.2023-------------------------------------------------------------------
+solcjs --abi MetricNew10012023.sol -o build
+solcjs --bin MetricNew10012023.sol -o build
+./abigen --bin=MetricNew10012023_sol_Metric1_63367af765d44a7b142f7DevTest01a.bin --abi=MetricNew10012023_sol_Metric1_63367af765d44a7b142f7DevTest01a.abi --pkg=store --out=MetricNew10012023.go
+
+Nonce :  412
+Auth  :  &{0x7fD5918Bc9fB9c0135865F3A36cE5E1295Ec54Ce 412 0x7ff6e23a4dc0 0 15000000000 <nil> <nil> 3000000 context.Background false}
+Gas price :  15000000000
+Gas limit :  3000000
+Contract address : https://sepolia.etherscan.io/address/0x820B863AB08214f7bCfEF7E5eD1782c9df120B6D
+Transaction Hash ;  https://sepolia.etherscan.io/tx/0x781a33d73dac7e79b66c6e6f1eb1f6457d339ae8c1d1e3b29dcf5b1ef41dec60
+
 -------------------------------------------------------------------Metric 1-------------------------------------------------------------------
 solcjs --abi Metric1.sol -o build
 solcjs --bin Metric1.sol -o build
